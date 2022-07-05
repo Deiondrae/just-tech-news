@@ -1,5 +1,6 @@
 const { Model, DataTypes } = require("sequelize");
 const sequelize = require("../config/connection");
+const bcrypt = require('bcrypt');
 
 //create user model
 class User extends Model {}
@@ -44,8 +45,17 @@ User.init(
         } 
     },
     {
-        //TABLE CONFIG OPTIONS GO HERE
-
+        hooks: {
+            //set up beforeCreate lifestyle hook
+            async beforeCreate(newUserData) {
+                newUserData.password = await bcrypt.hash(newUserData.password, 10)
+                    return newUserData;
+            },
+            async beforeUpdate(updatedUserData) {
+                updatedUserData.password = await bcrypt.hash(updatedUserData.password, 10)
+                    return updatedUserData;
+            }
+        },
         //connection to database
         sequelize,
         //dont automatically generate timestamp fields
