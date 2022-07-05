@@ -11,7 +11,7 @@ router.get("/", (req, res) =>{
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
-        })
+        });
 });
 
 //GET /api/users/1
@@ -32,7 +32,7 @@ router.get("/:id", (req, res) =>{
     .catch(err => {
         console.log(err);
         res.status(500).json(err);
-    })
+    });
 });
 
 //POST /api/users
@@ -46,7 +46,30 @@ router.post("/", (req, res) => {
     .catch(err => {
         console.log(err);
         res.status(500).json(err);
-    })
+    });
+});
+
+//login route
+router.post("/login", (req, res) => {
+    //query operation
+    User.findOne({
+        where: {
+            email: req.body.email
+        }
+    }).then(dbUserData => {
+        if (!dbUserData) {
+            res.status(400).json({ message: "No user with that email address"});
+            return;
+        }
+
+        //verify user
+        const validPassword = dbUserData.checkPassword(req.body.password);
+        if(!validPassword) {
+            res.status(400).json({ message: "incorrect password!"});
+            return;
+        }
+        res.json({ user: dbUserData, message: "You are now logged in" });
+    });
 });
 
 //PUT api/users/1
@@ -87,7 +110,7 @@ router.delete("/:id", (req, res) => {
     .catch(err => {
         console.log(err);
         res.status(500).json(err);
-    })
+    });
 });
 
 module.exports = router;
